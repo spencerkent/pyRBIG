@@ -5,7 +5,7 @@ This file defines functionality to invert an RBIG transform
 import numpy as np
 from univariate_invert_normalization import univariate_invert_normalization
 
-def invert_rbig(gaussian_data, transform_params):
+def invert_rbig(gaussian_data, transform_params, progress_report_interval=None):
   """
   Inverts an RBIG transform by using the saved transform params
 
@@ -26,6 +26,9 @@ def invert_rbig(gaussian_data, transform_params):
           base level dictionary has keys
           'empirical_pdf_support', 'empirical_pdf', 'uniform_cdf_support',
           and 'uniform_cdf':
+  progress_report_interval : int, optional
+      If specified, report the RBIG iteration number every 
+      progress_report_interval iterations.
 
   Returns
   -------
@@ -35,9 +38,10 @@ def invert_rbig(gaussian_data, transform_params):
   sampled_data = np.copy(gaussian_data)
   total_iters = 0
   for rbig_iter in range(len(transform_params['iterations'])-1, -1, -1):
-    if rbig_iter % 10 == 0:
-      print("Completed ", len(transform_params['iterations']) - rbig_iter,
-            "iterations of Inverse-RBIG")
+    if progress_report_interval is not None:
+      if rbig_iter % progress_report_interval == 0:
+        print("Completed ", len(transform_params['iterations']) - rbig_iter,
+              "iterations of Inverse-RBIG")
     # we have to go in reverse order
     rotation_matrix = transform_params['iterations'][rbig_iter]['rotation_matrix']
     sampled_data = np.dot(rotation_matrix.T, sampled_data)

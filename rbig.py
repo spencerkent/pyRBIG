@@ -6,8 +6,8 @@ import numpy as np
 from scipy.stats import ortho_group
 from univariate_make_normal import univariate_make_normal
 
-def rbig(data, num_iters, rotation_type,
-         pdf_extension=0.1, pdf_resolution=1000):
+def rbig(data, num_iters, rotation_type, pdf_extension=0.1, 
+         pdf_resolution=1000, progress_report_interval=None):
   """
   Rotation-based iterative gaussianization
 
@@ -32,6 +32,9 @@ def rbig(data, num_iters, rotation_type,
       iteration have to be stored so that we can invert them later - if working
       with high-dimensional data consider reducing this resolution to shorten
       computation time.
+  progress_report_interval : int, optional
+      If specified, report the RBIG iteration number every 
+      progress_report_interval iterations.
   """
   parameter_lookup = {'pdf_extension': pdf_extension,
                       'pdf_resolution': pdf_resolution,
@@ -44,8 +47,9 @@ def rbig(data, num_iters, rotation_type,
   g_data = np.copy(data)  # gaussianized data
 
   for rbig_iter in range(num_iters):
-    if rbig_iter % 10 == 0:
-      print("Completed ", rbig_iter, "iterations of RBIG")
+    if progress_report_interval is not None:
+      if rbig_iter % progress_report_interval == 0:
+        print("Completed ", rbig_iter, "iterations of RBIG")
     # Marginal gaussianization
     for c_idx in range(num_components):
       if c_idx == 0:
@@ -64,11 +68,16 @@ def rbig(data, num_iters, rotation_type,
           rbig_iter]['rotation_matrix'] = rand_ortho_matrix
 
     elif rotation_type == 'PCA':
-      C = np.dot(g_data, g_data.T) / num_samples
-      U, s, Vt = np.linalg.svd(C)
+      if g_data.shape[0] > g_data.shape[1] or g_data.shape[0] > 10**6:
+        # If the dimensionality of each datapoint is high, we probably
+        # want to do this via SVD
+        U, s, Vt = np.linalg.svd(g_data)
+      else:
+        w, U = np.linalg.eig(np.dot(g_data, g_data.T) / num_samples)
+
       U = U / np.abs(np.linalg.det(U))**(1 / U.shape[0])
-      #^ I don't this this is necessary because svd returns orthonormal matrices
-      # or singular vectors, but maybe it's a good safety check
+      #^ I don't this this is necessary because svd and eig return orthonormal 
+      # matrices but maybe it's a good safety check
       g_data = np.dot(U.T, g_data)
       parameter_lookup['iterations'][
           rbig_iter]['rotation_matrix'] = U.T
