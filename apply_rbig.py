@@ -42,7 +42,7 @@ def apply_rbig(data, transform_params):
           transform_params['iterations'][rbig_iter][
             component_idx]['uniform_cdf_support'],
           transform_params['iterations'][rbig_iter][
-            component_idx]['uniform_cdf'])(
+            component_idx]['uniform_cdf'], fill_value='extrapolate')(
           rbig_transformed[component_idx, :])
       # marginal gaussianization
       rbig_transformed[component_idx] = \

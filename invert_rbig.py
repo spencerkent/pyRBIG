@@ -27,7 +27,7 @@ def invert_rbig(gaussian_data, transform_params, progress_report_interval=None):
           'empirical_pdf_support', 'empirical_pdf', 'uniform_cdf_support',
           and 'uniform_cdf':
   progress_report_interval : int, optional
-      If specified, report the RBIG iteration number every 
+      If specified, report the RBIG iteration number every
       progress_report_interval iterations.
 
   Returns
@@ -43,7 +43,8 @@ def invert_rbig(gaussian_data, transform_params, progress_report_interval=None):
         print("Completed ", len(transform_params['iterations']) - rbig_iter,
               "iterations of Inverse-RBIG")
     # we have to go in reverse order
-    rotation_matrix = transform_params['iterations'][rbig_iter]['rotation_matrix']
+    rotation_matrix = (transform_params['iterations'][rbig_iter]
+                                       ['rotation_matrix'])
     sampled_data = np.dot(rotation_matrix.T, sampled_data)
     for component_idx in range(sampled_data.shape[0]):
       sampled_data[component_idx, :] = univariate_invert_normalization(

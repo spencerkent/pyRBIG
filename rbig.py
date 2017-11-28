@@ -6,7 +6,7 @@ import numpy as np
 from scipy.stats import ortho_group
 from univariate_make_normal import univariate_make_normal
 
-def rbig(data, num_iters, rotation_type, pdf_extension=0.1, 
+def rbig(data, num_iters, rotation_type, pdf_extension=0.1,
          pdf_resolution=1000, progress_report_interval=None):
   """
   Rotation-based iterative gaussianization
@@ -33,7 +33,7 @@ def rbig(data, num_iters, rotation_type, pdf_extension=0.1,
       with high-dimensional data consider reducing this resolution to shorten
       computation time.
   progress_report_interval : int, optional
-      If specified, report the RBIG iteration number every 
+      If specified, report the RBIG iteration number every
       progress_report_interval iterations.
   """
   parameter_lookup = {'pdf_extension': pdf_extension,
@@ -76,7 +76,7 @@ def rbig(data, num_iters, rotation_type, pdf_extension=0.1,
         w, U = np.linalg.eig(np.dot(g_data, g_data.T) / num_samples)
 
       U = U / np.abs(np.linalg.det(U))**(1 / U.shape[0])
-      #^ I don't this this is necessary because svd and eig return orthonormal 
+      #^ I don't this this is necessary because svd and eig return orthonormal
       # matrices but maybe it's a good safety check
       g_data = np.dot(U.T, g_data)
       parameter_lookup['iterations'][
