@@ -68,16 +68,17 @@ def rbig(data, num_iters, rotation_type, pdf_extension=0.1,
           rbig_iter]['rotation_matrix'] = rand_ortho_matrix
 
     elif rotation_type == 'PCA':
-      if g_data.shape[0] > g_data.shape[1] or g_data.shape[0] > 10**6:
+      if num_components > num_samples or num_components > 10**6:
         # If the dimensionality of each datapoint is high, we probably
-        # want to do this via SVD
-        U, s, Vt = np.linalg.svd(g_data)
+        # want to compute the SVD of the data directly to avoid forming a huge
+        # covariance matrix
+        U, _, _ = np.linalg.svd(g_data, full_matrices=True)
       else:
-        w, U = np.linalg.eig(np.dot(g_data, g_data.T) / num_samples)
+        # the SVD is more numerically stable then eig so we'll use it on the 
+        # covariance matrix directly
+        U, _, _ = np.linalg.svd(np.dot(g_data, g_data.T) / num_samples, 
+                                full_matrices=True)
 
-      U = U / np.abs(np.linalg.det(U))**(1 / U.shape[0])
-      #^ I don't this this is necessary because svd and eig return orthonormal
-      # matrices but maybe it's a good safety check
       g_data = np.dot(U.T, g_data)
       parameter_lookup['iterations'][
           rbig_iter]['rotation_matrix'] = U.T
